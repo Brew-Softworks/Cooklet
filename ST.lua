@@ -1,7 +1,7 @@
 -- Brew Softworks -- SwordHax v3; Made with Code <3
 -------------------------------------------------------
 -- open sourced cause i probably won't develop this
--- anymore - discord.gg/subdomain ~ @dex4tw
+-- anymore
 -------------------------------------------------------
 
 ---- General Variables & Functions ----
@@ -113,7 +113,6 @@ function Brew:doReach()
     end)
     while Brew.isReach == true do
         Brew:getHitbox().Size = Brew.reachMagnitude
-        print(Brew.reachMagnitude)
         wait()
     end
 end
@@ -260,7 +259,6 @@ SwordTab:Toggle("Damage Amp", false, function(value)
 end)
 
 SwordTab:Textbox("Reach Magnitude",true, function(text)
-    print(Brew.reachType)
     if Brew.reachType == "Box" then
         Brew.reachMagnitude = Vector3.new(tonumber(text), tonumber(text), tonumber(text))
     elseif Brew.reachType == "Linear" then
