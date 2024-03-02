@@ -1,7 +1,7 @@
 -- Brew Softworks -- SwordHax v3; Made with Code <3
 -------------------------------------------------------
 -- open sourced cause i probably won't develop this
--- anymore
+-- anymore - discord.gg/subdomain ~ @dex4tw
 -------------------------------------------------------
 
 ---- General Variables & Functions ----
@@ -13,7 +13,9 @@ Brew = {
     -- Init Brew Variables --
     isReach = false,
     curReach = "Spoof",
+    damageAmp = false,
     reachMagnitude = Vector3.new(1, 0.800000011920929, 4),
+    reachType = "Box",
     selBox = false,
     selBoxColor = Color3.fromRGB(0,0,0),
 
@@ -96,7 +98,7 @@ function Brew:doReach()
     Brew:Spoof(Brew:getHitbox(), "Size", Vector3.new(1, 0.800000011920929, 4))
     Brew.isReach = true
     damageAmplification = Brew:getHitbox().Touched:Connect(function(part)
-        if Brew.isReach == true and part.Parent:FindFirstChildOfClass("Humanoid") then
+        if Brew.isReach == true and Brew.damageAmp == true and part.Parent:FindFirstChildOfClass("Humanoid") then
             local victimCharacter = part.Parent
             for i,v in pairs(victimCharacter:GetChildren()) do
                 if v:IsA("Part") and victimCharacter.Humanoid.Health ~= 0 and victimCharacter.Humanoid.Health > 0 and victimCharacter.Name ~= Player.Name then
@@ -111,6 +113,7 @@ function Brew:doReach()
     end)
     while Brew.isReach == true do
         Brew:getHitbox().Size = Brew.reachMagnitude
+        print(Brew.reachMagnitude)
         wait()
     end
 end
@@ -236,7 +239,7 @@ end)
 
 -- Init UI Commands --
 HomeTab:Label("Brew V3 - Sword Modding")
-HomeTab:Label("https://discord.gg/brewsoftworks")
+HomeTab:Label("https://discord.gg/subdomain")
 
 SwordTab:Toggle("Reach", false, function(value)
     if value == true then
@@ -248,12 +251,48 @@ SwordTab:Toggle("Reach", false, function(value)
     end
 end)
 
+SwordTab:Toggle("Damage Amp", false, function(value)
+    if value == true then
+        Brew.damageAmp = true
+    elseif value == false then
+        Brew.damageAmp = false
+    end
+end)
+
 SwordTab:Textbox("Reach Magnitude",true, function(text)
-    Brew.reachMagnitude = Vector3.new(tonumber(text), tonumber(text), tonumber(text))
+    print(Brew.reachType)
+    if Brew.reachType == "Box" then
+        Brew.reachMagnitude = Vector3.new(tonumber(text), tonumber(text), tonumber(text))
+    elseif Brew.reachType == "Linear" then
+        Brew.reachMagnitude = Vector3.new(1, 0.800000011920929, tonumber(text))
+    elseif Brew.reachType == "Wide" then
+        Brew.reachMagnitude = Vector3.new(tonumber(text) * .3, tonumber(text) * .3, tonumber(text))
+    end
 end)
 
 SwordTab:Dropdown("Reach Method",{"Sword Spoofing"}, function(option)
     Brew.curReach = option
+end)
+
+SwordTab:Dropdown("Reach Type",{"Box", "Linear", "Wide"}, function(option)
+    Brew.reachType = option
+    lastMagnitude = Brew.reachMagnitude
+
+    -- Set New Magnitude
+    if Brew.reachType == "Box" then
+        Brew.reachMagnitude = Vector3.new(lastMagnitude.Z, lastMagnitude.Z, lastMagnitude.Z)
+    elseif Brew.reachType == "Linear" then
+        Brew.reachMagnitude = Vector3.new(1, 0.800000011920929, lastMagnitude.Z)
+    elseif Brew.reachType == "Wide" then
+        Brew.reachMagnitude = Vector3.new(lastMagnitude.Z * .3, lastMagnitude.Z * .3, lastMagnitude.Z)
+    end
+
+    -- Restart Reach
+    if Brew.isReach then
+        Brew:undoReach()
+        wait()
+        Brew:doReach()
+    end
 end)
 
 SwordTab:Toggle("SelectionBox", false, function(value)
