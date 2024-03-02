@@ -95,22 +95,20 @@ function Brew:doReach()
     Brew:disableConnection(Brew:getHitbox():GetPropertyChangedSignal("Size"))
     Brew:Spoof(Brew:getHitbox(), "Size", Vector3.new(1, 0.800000011920929, 4))
     Brew.isReach = true
-    if not identifyexecutor() == "Fluxus" then
-        damageAmplification = Brew:getHitbox().Touched:Connect(function(part)
-            if Brew.isReach == true and part.Parent:FindFirstChildOfClass("Humanoid") then
-                local victimCharacter = part.Parent
-                for i,v in pairs(victimCharacter:GetChildren()) do
-                    if v:IsA("Part") and victimCharacter.Humanoid.Health ~= 0 and victimCharacter.Humanoid.Health > 0 and victimCharacter.Name ~= Player.Name then
-                        task.spawn(function()
-                            firetouchinterest(v, Brew:getHitbox(), 0)
-                            wait();
-                            firetouchinterest(v, Brew:getHitbox(), 1)
-                        end)
-                    end
+    damageAmplification = Brew:getHitbox().Touched:Connect(function(part)
+        if Brew.isReach == true and part.Parent:FindFirstChildOfClass("Humanoid") then
+            local victimCharacter = part.Parent
+            for i,v in pairs(victimCharacter:GetChildren()) do
+                if v:IsA("Part") and victimCharacter.Humanoid.Health ~= 0 and victimCharacter.Humanoid.Health > 0 and victimCharacter.Name ~= Player.Name then
+                    task.spawn(function()
+                        firetouchinterest(v, Brew:getHitbox(), 0)
+                        wait();
+                        firetouchinterest(v, Brew:getHitbox(), 1)
+                    end)
                 end
             end
-        end)
-    end
+        end
+    end)
     while Brew.isReach == true do
         Brew:getHitbox().Size = Brew.reachMagnitude
         wait()
@@ -187,9 +185,7 @@ local CharacterTab = Window:Tab("Character")
 local AppearanceTab = Window:Tab("Appearance")
 
 -- Alert user of Executor --
-if not identifyexecutor() == "Fluxus" then
-    Library:Notification("Warning", "You are using a bad executor; expect features to be disabled & expect for you to be detected.", "Okay")
-end
+Library:Notification("Warning", "Please make sure you are using a proper executor, if not this may be detected.", "Okay")
 
 -- Prevent Client-Sided Anticheat --
 Brew:disableConnection(Brew:getHitbox():GetPropertyChangedSignal("Size"))
