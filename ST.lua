@@ -174,7 +174,7 @@ function Brew:undoSelBox()
         Brew:getHitbox():FindFirstChildOfClass("SelectionBox"):Destroy()
     end
 end
-function Brew:Patch()
+function Brew:Patch() -- Unused & Detected function
     local Seat = Instance.new("Seat")
     Brew:Spoof(Seat, "Parent", nil)
     local Weld = Instance.new("Weld")
