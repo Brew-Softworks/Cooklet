@@ -25,9 +25,29 @@ Brew = {
     CFSpeed = 1.35,
 
     Autoclick = false,
-    Spin = false
+    Spin = false,
+
+    supportedExecutor = true
 }
 
+_hookmetamethod = false
+_getconnections = false
+function Brew:authenticateFunctions()
+    if not hookmetamethod and not getconnections then
+        Brew.supportedExecutor = true
+    end
+    hookmetamethod(game, "__index", function(a,b)
+        _hookmetamethod = true
+    end)
+    for i,v in pairs(getconnections("Size")) do
+        _getconnections = true
+    end
+    if _hookmetamethod and _getconnections then
+        Brew.supportedExecutor = true
+    else
+        Brew.supportedExecutor = false
+    end
+end
 function Brew:Interpolate(part, targetCFrame, duration)
     return coroutine.wrap(function()
         local startTime = tick()
@@ -63,22 +83,30 @@ function Brew:WaitForChildOfClass(parents, className, timeout)
     return nil
 end
 function Brew:Spoof(Instance, Property, Value)
-    local b
-    b = hookmetamethod(game, "__index", function(A, B)
-        if not checkcaller() then
-            if A == Instance then
-                local filter = string.gsub(tostring(B), "\0", "")
-                if filter == Property then
-                    return Value
+    if Brew.supportedExecutor then
+        local b
+        b = hookmetamethod(game, "__index", function(A, B)
+            if not checkcaller() then
+                if A == Instance then
+                    local filter = string.gsub(tostring(B), "\0", "")
+                    if filter == Property then
+                        return Value
+                    end
                 end
             end
-        end
-        return b(A, B)
-    end)
+            return b(A, B)
+        end)
+    else
+        
+    end
 end
 function Brew:disableConnection(Connection)
-    for i, v in pairs(getconnections(Connection)) do
-        v:Disable()
+    if Brew.supportedExecutor then
+        for i, v in pairs(getconnections(Connection)) do
+            v:Disable()
+        end
+    else
+
     end
 end
 function Brew:getSword()
@@ -172,6 +200,7 @@ print[[----------------------------------
 | |_) | | |  __/\ V  V /
 |____/|_|  \___| \_/\_/    @dex4tw - bleh
 ----------------------------------------------]]
+Brew:authenticateFunctions()
 Brew:disableConnection(game:GetService("ScriptContext").Error)
 
 -- Init UI Library --
@@ -186,8 +215,10 @@ local SwordTab = Window:Tab("Mods")
 local CharacterTab = Window:Tab("Character")
 local AppearanceTab = Window:Tab("Appearance")
 
--- Alert user of Executor --
-Library:Notification("Warning", "Please make sure you are using a proper executor, if not this may be detected.", "Okay")
+-- Alert user of executor --
+if not Brew.supportedExecutor then
+    Library:Notification("Warning", "Your executor does not support the required functions to prevent anti-cheat detection", "Okay")    
+end
 
 -- Prevent Client-Sided Anticheat --
 Brew:disableConnection(Brew:getHitbox():GetPropertyChangedSignal("Size"))
