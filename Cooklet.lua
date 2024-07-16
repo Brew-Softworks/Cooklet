@@ -200,7 +200,7 @@ print[[----------------------------------
 | |_) | | |  __/\ V  V /
 |____/|_|  \___| \_/\_/    @dex4tw - bleh
 ----------------------------------------------]]
-Brew:authenticateFunctions()
+-- Brew:authenticateFunctions()
 Brew:disableConnection(game:GetService("ScriptContext").Error)
 
 -- Init UI Library --
