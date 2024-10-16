@@ -27,25 +27,12 @@ Brew = {
     Autoclick = false,
     Spin = false,
 
-    supportedExecutor = true
+    supportedExecutor = false
 }
 
-_hookmetamethod = false
-_getconnections = false
 function Brew:authenticateFunctions()
-    if not hookmetamethod and not getconnections then
-        Brew.supportedExecutor = true
-    end
-    hookmetamethod(game, "__index", function(a,b)
-        _hookmetamethod = true
-    end)
-    for i,v in pairs(getconnections("Size")) do
-        _getconnections = true
-    end
-    if _hookmetamethod and _getconnections then
-        Brew.supportedExecutor = true
-    else
-        Brew.supportedExecutor = false
+    if hookmetamethod and getconnections then
+        Brew.supportedExecutor = true    
     end
 end
 function Brew:Interpolate(part, targetCFrame, duration)
@@ -200,7 +187,7 @@ print[[----------------------------------
 | |_) | | |  __/\ V  V /
 |____/|_|  \___| \_/\_/    @dex4tw - bleh
 ----------------------------------------------]]
--- Brew:authenticateFunctions()
+Brew:authenticateFunctions()
 Brew:disableConnection(game:GetService("ScriptContext").Error)
 
 -- Init UI Library --
