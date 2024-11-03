@@ -24,8 +24,11 @@ Brew = {
     cWalking = false,
     CFSpeed = 1.35,
 
+    areaMultiplier = 1.3,
+    lastInput = 0,
     Autoclick = false,
     Spin = false,
+    HBE = false,
 
     supportedExecutor = false
 }
@@ -101,64 +104,106 @@ function Brew:getSword()
 end
 function Brew:getHitbox()
     for i,v in pairs(Brew:getSword():GetDescendants()) do
-        if v:FindFirstChildOfClass("TouchTransmitter") then
-            v.Massless = true
-            return v
+        local Transmitter = Brew:WaitForChildOfClass({v}, "TouchTransmitter")
+        local Handle = Transmitter.Parent
+        if Handle and Transmitter then
+            Handle.Massless = true
+            return Handle
         end
     end
 end
 function Brew:doReach()
-    Brew:getSword()
-    Brew:disableConnection(Brew:getHitbox():GetPropertyChangedSignal("Size"))
-    Brew:Spoof(Brew:getHitbox(), "Size", Vector3.new(1, 0.800000011920929, 4))
-    Brew.isReach = true
-    damageAmplification = Brew:getHitbox().Touched:Connect(function(part)
-        if Brew.isReach == true and Brew.damageAmp == true and part.Parent:FindFirstChildOfClass("Humanoid") then
-            local victimCharacter = part.Parent
-            for i,v in pairs(victimCharacter:GetChildren()) do
-                if v:IsA("Part") and victimCharacter.Humanoid.Health ~= 0 and victimCharacter.Humanoid.Health > 0 and victimCharacter.Name ~= Player.Name then
+    s, e = pcall(function()
+        Brew:getSword()
+        Brew:disableConnection(Brew:getHitbox():GetPropertyChangedSignal("Size"))
+        Brew:Spoof(Brew:getHitbox(), "Size", Vector3.new(1, 0.800000011920929, 4))
+        Brew.isReach = true
+        damageAmplification = Brew:getHitbox().Touched:Connect(function(part)
+            if Brew.isReach == true and Brew.damageAmp == true and part.Parent:FindFirstChildOfClass("Humanoid") then
+                local victimCharacter = part.Parent
+                for i,v in pairs(victimCharacter:GetChildren()) do
+                    if v:IsA("Part") and victimCharacter.Humanoid.Health ~= 0 and victimCharacter.Humanoid.Health > 0 and victimCharacter.Name ~= Player.Name then
+                        task.spawn(function()
+                            firetouchinterest(v, Brew:getHitbox(), 0)
+                            wait();
+                            firetouchinterest(v, Brew:getHitbox(), 1)
+                        end)
+                    end
+                end
+            end
+        end)
+        while Brew.isReach == true do
+            wait()
+            -- Vector3.new(2, 2, 1) HRP Default Size
+            if Brew.HBE == true and Brew.reachType == "Hitbox" then
+                Brew:getHitbox().Size = Vector3.new(1, 0.800000011920929, 4)
+                for i, player in pairs(game:GetService("Players"):GetChildren()) do
                     task.spawn(function()
-                        firetouchinterest(v, Brew:getHitbox(), 0)
-                        wait();
-                        firetouchinterest(v, Brew:getHitbox(), 1)
+                        if player ~= game.Players.LocalPlayer then
+                            pcall(function()
+                                local Root = player.Character:FindFirstChild("HumanoidRootPart")
+                                Root.Size = Brew.reachMagnitude * 2
+                                Root.Transparency = 0.8
+                                Root.CanCollide = false
+                            end)
+                        end
                     end)
                 end
+            else
+                Brew:getHitbox().Size = Brew.reachMagnitude
             end
         end
     end)
-    while Brew.isReach == true do
-        Brew:getHitbox().Size = Brew.reachMagnitude
-        wait()
+    if not s then
+        warn("[Cooklet]: Issue in doReach", e)
     end
 end
+function Brew:Rage()
+
+end
 function Brew:undoReach()
-    Brew:disableConnection(Brew:getHitbox():GetPropertyChangedSignal("Size"))
-    Brew:Spoof(Brew:getHitbox(), "Size", Vector3.new(1, 0.800000011920929, 4))
-    Brew.isReach = false
-    if Brew:getHitbox() then
-        Brew:getHitbox().Size = Vector3.new(1, 0.800000011920929, 4)
-    end
-    if damageAmplification then
-        damageAmplification:Disconnect()
+    s, e = pcall(function()
+        Brew:disableConnection(Brew:getHitbox():GetPropertyChangedSignal("Size"))
+        Brew:Spoof(Brew:getHitbox(), "Size", Vector3.new(1, 0.800000011920929, 4))
+        Brew.isReach = false
+        if Brew:getHitbox() then
+            Brew:getHitbox().Size = Vector3.new(1, 0.800000011920929, 4)
+        end
+        if damageAmplification then
+            damageAmplification:Disconnect()
+        end
+    end)
+    if not s then
+        warn("[Cooklet]: Issue in undoReach", e)
     end
 end
 function Brew:doSelBox()
-    if not Brew:getHitbox():FindFirstChildOfClass("SelectionBox") then
-        Brew.selBox = true
-        local Box = Instance.new("SelectionBox", Brew:getHitbox())
-        Box.Adornee = Brew:getHitbox()
-        Box.LineThickness = 0.01
-        while Brew.selBox == true do
-            Box.Color3 = Brew.selBoxColor
-            wait()
+    s, e = pcall(function()
+        if not Brew:getHitbox():FindFirstChildOfClass("SelectionBox") then
+            Brew.selBox = true
+            local Box = Instance.new("SelectionBox", Brew:getHitbox())
+            Box.Adornee = Brew:getHitbox()
+            Box.LineThickness = 0.01
+            while Brew.selBox == true do
+                Box.Color3 = Brew.selBoxColor
+                wait()
+            end
         end
+    end)
+    if not s then
+        warn("[Cooklet]: Issue in doSelBox", e)
     end
 end
 function Brew:undoSelBox()
-    if Brew:getHitbox() and Brew:getHitbox():FindFirstChildOfClass("SelectionBox") then
-        Brew.selBox = false
-        wait(.15)
-        Brew:getHitbox():FindFirstChildOfClass("SelectionBox"):Destroy()
+    s, e = pcall(function()
+        if Brew:getHitbox() and Brew:getHitbox():FindFirstChildOfClass("SelectionBox") then
+            Brew.selBox = false
+            wait(.15)
+            Brew:getHitbox():FindFirstChildOfClass("SelectionBox"):Destroy()
+        end
+    end)
+    if not s then 
+        warn("[Cooklet]: Issue in undoSelBox", e)
     end
 end
 function Brew:Patch() -- Unused & Detected function
@@ -189,6 +234,9 @@ print[[----------------------------------
 ----------------------------------------------]]
 Brew:authenticateFunctions()
 Brew:disableConnection(game:GetService("ScriptContext").Error)
+
+-- Ragebot Loop --
+
 
 -- Init UI Library --
 local Library = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/Vape.txt")()
@@ -226,12 +274,7 @@ end)
 Player.CharacterAdded:Connect(function()
     -- Re-do Settings --
     Brew:getSword() -- wait for sword
-    wait(.25)
-    for i,v in pairs(Brew:getSword():GetDescendants()) do
-        if v:FindFirstChildOfClass("TouchTransmitter") then
-            v.Massless = true
-        end
-    end
+    Brew:getHitbox()
     task.spawn(function()
         if Brew.isReach == true then
             Brew:doReach()
@@ -268,6 +311,14 @@ SwordTab:Toggle("Reach", false, function(value)
     end
 end)
 
+SwordTab:Toggle("Ragebot", false, function(value)
+    if value == true then
+        Library:Notification("Warning", "This feature is has not been implemented.", "Okay")    
+    elseif value == false then
+        -- void
+    end
+end)
+
 SwordTab:Toggle("Damage Amp", false, function(value)
     if value == true then
         Brew.damageAmp = true
@@ -277,12 +328,13 @@ SwordTab:Toggle("Damage Amp", false, function(value)
 end)
 
 SwordTab:Textbox("Reach Magnitude",true, function(text)
+    Brew.lastInput = tonumber(text)
     if Brew.reachType == "Box" then
         Brew.reachMagnitude = Vector3.new(tonumber(text), tonumber(text), tonumber(text))
     elseif Brew.reachType == "Linear" then
-        Brew.reachMagnitude = Vector3.new(1, 0.800000011920929, tonumber(text))
+        Brew.reachMagnitude = Vector3.new(1, 0.800000011920929, tonumber(text) * Brew.areaMultiplier)
     elseif Brew.reachType == "Wide" then
-        Brew.reachMagnitude = Vector3.new(tonumber(text) * .3, tonumber(text) * .3, tonumber(text))
+        Brew.reachMagnitude = Vector3.new(tonumber(text) * Brew.areaMultiplier, tonumber(text) * Brew.areaMultiplier, tonumber(text))
     end
 end)
 
@@ -290,17 +342,27 @@ SwordTab:Dropdown("Reach Method",{"Sword Spoofing"}, function(option)
     Brew.curReach = option
 end)
 
-SwordTab:Dropdown("Reach Type",{"Box", "Linear", "Wide"}, function(option)
+SwordTab:Dropdown("Reach Type",{"Box", "Linear", "Wide", "Hitbox"}, function(option)
     Brew.reachType = option
-    lastMagnitude = Brew.reachMagnitude
 
     -- Set New Magnitude
     if Brew.reachType == "Box" then
-        Brew.reachMagnitude = Vector3.new(lastMagnitude.Z, lastMagnitude.Z, lastMagnitude.Z)
+        Brew.reachMagnitude = Vector3.new(Brew.lastInput, Brew.lastInput, Brew.lastInput)
     elseif Brew.reachType == "Linear" then
-        Brew.reachMagnitude = Vector3.new(1, 0.800000011920929, lastMagnitude.Z)
+        Brew.reachMagnitude = Vector3.new(1, 0.800000011920929, Brew.lastInput * Brew.areaMultiplier)
     elseif Brew.reachType == "Wide" then
-        Brew.reachMagnitude = Vector3.new(lastMagnitude.Z * .3, lastMagnitude.Z * .3, lastMagnitude.Z)
+        Brew.reachMagnitude = Vector3.new(Brew.lastInput * Brew.areaMultiplier, Brew.lastInput * Brew.areaMultiplier, Brew.lastInput)
+    elseif Brew.reachType == "Hitbox" then
+        Brew.HBE = true
+    end
+    if Brew.reachType ~= "Hitbox" then
+        Brew.HBE = false
+        for i, player in pairs(game:GetService("Players"):GetChildren()) do
+            if player and player.Character and player ~= game.Players.LocalPlayer then
+                player.Character:FindFirstChild("HumanoidRootPart").Size = Vector3.new(2,2,1)
+                player.Character:FindFirstChild("HumanoidRootPart").Transparency = 1
+            end
+        end
     end
 
     -- Restart Reach
@@ -329,10 +391,12 @@ SwordTab:Toggle("Autoclick",false, function(value)
     if value == true then
         Brew.Autoclick = true
         while Brew.Autoclick do
-            if Brew:getSword().Parent == Player.Character then
-                Brew:getSword():Activate()
-            end
-            wait()
+            pcall(function()
+                if Brew:getSword().Parent == Player.Character then
+                    Brew:getSword():Activate()
+                end
+                wait()
+            end)
         end
     elseif value == false then
         Brew.Autoclick = false
@@ -378,4 +442,20 @@ AppearanceTab:Bind("Toggle UI", Enum.KeyCode.LeftControl, function()
 	elseif WindowInstance.Enabled == false then
 		WindowInstance.Enabled = true
 	end
+end)
+
+---- Init Loop ----
+task.spawn(function()
+    print("[Cooklet]: HBE Loop Init")
+    while not Brew.HBE do
+        pcall(function()
+            for i, player in pairs(game:GetService("Players"):GetChildren()) do
+                if player and player.Character and player ~= game.Players.LocalPlayer then
+                    player.Character:FindFirstChild("HumanoidRootPart").Size = Vector3.new(2,2,1)
+                    player.Character:FindFirstChild("HumanoidRootPart").Transparency = 1
+                end
+            end
+            wait(2)
+        end)
+    end
 end)
