@@ -35,8 +35,9 @@ Brew = {
 
 function Brew:authenticateFunctions()
     if hookmetamethod and getconnections then
-        Brew.supportedExecutor = true    
+        Brew.supportedExecutor = true
     end
+
 end
 function Brew:Interpolate(part, targetCFrame, duration)
     return coroutine.wrap(function()
@@ -73,7 +74,7 @@ function Brew:WaitForChildOfClass(parents, className, timeout)
     return nil
 end
 function Brew:Spoof(Instance, Property, Value)
-    if Brew.supportedExecutor then
+    if hookmetamethod then
         local b
         b = hookmetamethod(game, "__index", function(A, B)
             if not checkcaller() then
@@ -86,17 +87,13 @@ function Brew:Spoof(Instance, Property, Value)
             end
             return b(A, B)
         end)
-    else
-        
     end
 end
 function Brew:disableConnection(Connection)
-    if Brew.supportedExecutor then
+    if getconnections then
         for i, v in pairs(getconnections(Connection)) do
             v:Disable()
         end
-    else
-
     end
 end
 function Brew:getSword()
