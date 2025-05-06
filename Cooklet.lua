@@ -253,7 +253,8 @@ if not Brew.supportedExecutor then
 end
 
 -- Prevent Client-Sided Anticheat --
-Brew:disableConnection(Brew:getHitbox():GetPropertyChangedSignal("Size"))
+-- Brew:disableConnection(Brew:getHitbox():GetPropertyChangedSignal("Size"))
+-- ^ THIS LINE HERE BUGGED THE UI, WHY? IDK.
 
 -- Setting Reconstruction -- 
 Player.Character.Humanoid.Died:Connect(function()
